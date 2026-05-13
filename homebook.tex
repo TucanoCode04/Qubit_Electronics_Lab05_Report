@@ -1,0 +1,149 @@
+\documentclass[10pt,  english, a4paper, titlepage, oneside]{book}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{babel}
+\usepackage{fancyhdr}
+% \usepackage{makeidx}
+\usepackage{titlesec}
+\usepackage{listings} 
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{array}
+\usepackage[subtle]{savetrees}
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\chapter}{\clearpage}{\par}{}{}
+\patchcmd{\chapter}{\cleardoublepage}{\par}{}{}
+\makeatother
+
+\newenvironment{listato}{\footnotesize}
+                        {\normalsize }
+
+%\pagestyle{empty}
+
+\textwidth 15.5cm
+\textheight 23cm
+\topmargin -1cm
+\oddsidemargin -0.5cm
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{}
+\chead{Qubit Electronics}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+\rhead{\thepage}
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{needspace}
+%\oddsidemargin -1.1cm
+\usepackage{etoolbox}
+\makeatletter
+\makeatother
+
+% Chapter formatting
+\titleformat{\chapter}[block]
+{\normalfont\Large\sffamily\bfseries}
+{\thechapter.}{0.5em}{}
+[\vspace{2pt}\rule{\textwidth}{0.4pt}]
+
+\titlespacing*{\chapter}{0pt}{20pt}{2pt}
+
+% Section formatting
+\titleformat{\section}[block]
+{\normalfont\large\sffamily}
+{\thesection}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{8pt}{10pt}
+
+\setlength{\parskip}{0pt}
+
+\setlength{\parindent}{1em}
+
+\setlength{\textfloatsep}{10pt}
+\setlength{\floatsep}{8pt}
+\setlength{\intextsep}{8pt}
+
+\titleformat{\subsection}[block]
+{\normalfont\normalsize\sffamily}
+{\thesubsection}{0.5em}{}
+
+\titlespacing*{\subsection}{0pt}{8pt}{8pt}
+
+\lstset{
+    basicstyle=\footnotesize,
+    aboveskip=5pt,
+    belowskip=5pt
+}
+\lstset{captionpos=b}
+
+\newcommand{\SubSubSection}[1]{\subsubsection{\bf Exercise   ~#1}}
+
+\newcommand{\homework}[1]{\subsubsection{\bf Homework   ~#1}}
+
+\newcommand{\Solution}{\subsubsection{\bf Solution}}
+
+
+
+
+% \makeindex
+\begin{document}
+\frontmatter
+\begin{titlepage}
+\vspace{2cm}
+\centerline{
+\includegraphics[width=8cm]{./logopoli}}  
+%\centerline{\LARGE Politecnico di Torino}
+\bigskip
+\centerline{\LARGE Politecnico di Torino}
+\vspace{4cm}
+\centerline{\Huge\sf Lab report for the course}
+\bigskip
+\centerline{\Huge\bfseries\sf Qubit Electronics}
+\vspace{2cm}
+\centerline{\LARGE Master degree in Quantum Engineering}
+\vspace{4.4cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GROUP
+% Change the name of your group below
+%
+\centerline{\Large Authors: Group 3}
+\vspace{2cm}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AUTHORS
+% Change the name of the Group participants here
+%
+\centerline{Riola Leonardo Antonio, Donati Davide, Girotto Giacomo}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{2cm}
+\centerline{\today}
+\end{titlepage}
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+\mainmatter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%    
+%% HERE IS THE MAIN INCLUSION
+%%
+\input{intro/intro.tex}
+%\input{leo_part/leo_part.tex}
+%\input{Davide/es3.tex}
+%\input{Giacomo/es4.tex}
+
+
+%% NOW READ THE FILE master.tex  
+\end{document}
