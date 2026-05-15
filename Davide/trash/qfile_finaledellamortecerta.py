@@ -18,6 +18,28 @@ from qtcad.device.leverarm_matrix import Solver as LeverArmSolver
 import numpy as np
 import pathlib
 
+
+def nodal_volume_weights(mesh):
+   # Tetrahedron orientation can make volumes signed; integration weights
+   # must use positive physical volumes.
+   volumes = np.abs(np.asarray(mesh.tetra_volumes(), dtype=float))
+   connectivity = np.asarray(mesh.connectivity, dtype=int)
+   if connectivity.ndim != 2:
+      raise ValueError("Expected tetrahedral mesh connectivity to be a 2D array")
+   if len(volumes) != len(connectivity):
+      raise ValueError("Number of tetra volumes does not match mesh connectivity")
+
+   node_number = getattr(mesh, "node_number", int(np.max(connectivity)) + 1)
+   weights = np.zeros(node_number)
+   local_node_number = connectivity.shape[1]
+   np.add.at(
+      weights,
+      connectivity.ravel(),
+      np.repeat(volumes/local_node_number, local_node_number),
+   )
+   return weights
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #
 #       Input physical parameters
@@ -182,7 +204,7 @@ params_poisson.final_ref_factor = 0.85
 params_poisson.min_nodes = 0
 params_poisson.maxiter = 1000
 params_poisson.refined_region = dot_region
-params_poisson.h_refined = 0.25
+params_poisson.h_refined = 0.1
 params_poisson.max_nodes=1e10
 
 # Create an adaptive-mesh non-linear Poisson solver
@@ -237,19 +259,47 @@ state_densities = {
    label: np.abs(subd.eigenfunctions[:, i])**2
    for i, label in enumerate(state_labels)
 }
+volume_weights = nodal_volume_weights(subd.mesh)
 out_dict = {}
+normalization_info = {}
 for label, density in state_densities.items():
-   out_dict[label] = density
+   if len(density) != len(volume_weights):
+      raise ValueError(f"Density and volume weights have different sizes for {label}")
+
    density_max = np.max(density)
-   out_dict[f"{label} normalized"] = density/density_max if density_max != 0 else density
+   density_sum = np.sum(density)
+   density_volume_integral = np.sum(density*volume_weights)
+   normalization_info[label] = {
+      "max": density_max,
+      "point_sum": density_sum,
+      "volume_integral": density_volume_integral,
+   }
+
+   out_dict[label] = density
+   out_dict[f"{label} peak-normalized"] = (
+      density/density_max if density_max != 0 else density
+   )
+   out_dict[f"{label} point-sum-normalized"] = (
+      density/density_sum if density_sum != 0 else density
+   )
+   out_dict[f"{label} volume-integral-normalized"] = (
+      density/density_volume_integral if density_volume_integral != 0 else density
+   )
 out_dict["conf-potential"] = subd.V/ct.e
 io.save(str(path_vtu_q), out_dict, subd.mesh)
 with open(path_energies, "w") as f:
    f.write("Energy eigenvalues [eV]\n")
    for label, energy in zip(state_labels, subd.energies/ct.e):
       f.write(f"{label}: {energy:.12g}\n")
-   f.write("\nPoint-density maxima [m^-3]\n")
-   for label, density in state_densities.items():
-      f.write(f"{label}: {np.max(density):.12g}\n")
+   f.write("\nDensity normalization diagnostics\n")
+   f.write("peak-normalized fields are divided by max(|psi|^2)\n")
+   f.write("point-sum-normalized fields are divided by sum(|psi|^2) over mesh nodes\n")
+   f.write("volume-integral-normalized fields are divided by sum(|psi|^2*dV_node)\n")
+   for label, info in normalization_info.items():
+      f.write(
+         f"{label}: max={info['max']:.12g}, "
+         f"point_sum={info['point_sum']:.12g}, "
+         f"volume_integral={info['volume_integral']:.12g}\n"
+      )
    
 subd.print_energies()

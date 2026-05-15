@@ -55,8 +55,7 @@ path_vtu_n = path_out / "DQD_SiMOS_n.vtu"
 path_vtu_EC = path_out / "DQD_SiMOS_EC.vtu"
 path_vtu_p = path_out / "DQD_SiMOS_p.vtu"
 path_vtu_phi = path_out / "DQD_SiMOS_phi.vtu"
-# Test output: keep the previous q file safe if this run is interrupted.
-path_vtu_q = path_out / "DQD_SiMOS_q_refined_test.vtu"
+path_vtu_q = path_out / "DQD_SiMOS_q.vtu"
 path_energies = path_out / "DQD_SiMOS_energies.txt"
 
 path_out.mkdir(exist_ok=True)
@@ -182,7 +181,7 @@ params_poisson.final_ref_factor = 0.85
 params_poisson.min_nodes = 0
 params_poisson.maxiter = 1000
 params_poisson.refined_region = dot_region
-params_poisson.h_refined = 0.25
+params_poisson.h_refined = 0.3
 params_poisson.max_nodes=1e10
 
 # Create an adaptive-mesh non-linear Poisson solver
@@ -196,8 +195,6 @@ num_states = 5
 params_schrod = SchrodingerSolverParams()
 params_schrod.num_states = num_states
 params_schrod.tol = 1e-9
-params_schrod.method = "robust"
-params_schrod.maxiter = 3000
 
 d.set_V_from_phi()
 
@@ -211,25 +208,25 @@ subd.print_energies()
 energies = subd.energies
 np.save(path_out/"DQD_SiMOS_energies.npy",energies)
 
-# Full-device outputs are not needed to create the Schrodinger q file.
-# They are disabled for this refinement test to avoid writing several GB.
-# arrays_dict = {"n": d.n/1e6, "p": d.p/1e6, "phi": d.phi,
-#    "EC": d.cond_band_edge()/ct.e, "EV": d.vlnce_band_edge()/ct.e}
-# io.save(str(path_hdf5), arrays_dict)
-# arrays_dict = {"n": d.n/1e6}
-# io.save(str(path_vtu_n), arrays_dict, d.mesh)
-#
-# arrays_dict = {"p": d.p/1e6}
-# io.save(str(path_vtu_p), arrays_dict, d.mesh)
-#
-# arrays_dict = {"phi": d.phi}
-# io.save(str(path_vtu_phi), arrays_dict, d.mesh)
-#
-# arrays_dict = {"EC": d.cond_band_edge()/ct.e}
-# io.save(str(path_vtu_EC), arrays_dict, d.mesh)
-#
-# arrays_dict = {"EV": d.vlnce_band_edge()/ct.e}
-# io.save(str(path_vtu_EV), arrays_dict, d.mesh)
+# To save throughout the device: n, p, phi, EC, EV
+arrays_dict = {"n": d.n/1e6, "p": d.p/1e6, "phi": d.phi,
+   "EC": d.cond_band_edge()/ct.e, "EV": d.vlnce_band_edge()/ct.e}
+io.save(str(path_hdf5), arrays_dict)
+#io.save(str(path_vtu), arrays_dict, d.mesh)
+arrays_dict = {"n": d.n/1e6}
+io.save(str(path_vtu_n), arrays_dict, d.mesh)
+
+arrays_dict = {"p": d.p/1e6}
+io.save(str(path_vtu_p), arrays_dict, d.mesh)
+
+arrays_dict = {"phi": d.phi}
+io.save(str(path_vtu_phi), arrays_dict, d.mesh)
+
+arrays_dict = {"EC": d.cond_band_edge()/ct.e}
+io.save(str(path_vtu_EC), arrays_dict, d.mesh)
+
+arrays_dict = {"EV": d.vlnce_band_edge()/ct.e}
+io.save(str(path_vtu_EV), arrays_dict, d.mesh)
 
 # Schrodinger
 state_labels = ["Ground", "1st excited", "2nd excited", "3rd excited", "4th excited"]

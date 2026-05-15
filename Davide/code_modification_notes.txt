@@ -1,0 +1,597 @@
+Code modification notes for the SiMOS Poisson-Schrodinger scripts
+=================================================================
+
+Compared files
+--------------
+
+1. Davide/trash/SiMOS_poisson_schrodinger_original.py
+2. Davide/trash/ziopera.py
+3. Davide/trash/qfile.py
+
+The three scripts describe the same SiMOS double quantum-dot device: the
+same gate voltages, temperature, material regions, dot region, and general
+Poisson-Schrodinger workflow are preserved. The main changes are in output
+management, Schrodinger post-processing, solver robustness, and avoiding very
+large full-device output files during test runs.
+
+
+Modifications from SiMOS_poisson_schrodinger_original.py to ziopera.py
+----------------------------------------------------------------------
+
+1. Centralized output folder
+
+The original script builds every output path directly as
+
+    script_dir / "output" / "filename"
+
+In ziopera.py this is replaced by a common output directory variable:
+
+    path_out = script_dir / "output"
+
+All output files are then built from path_out. This makes the script easier to
+modify because changing the output directory requires changing only one line.
+
+ziopera.py also adds
+
+    path_out.mkdir(exist_ok=True)
+
+so the output directory is created automatically if it does not already exist.
+The original version assumes the directory already exists.
+
+
+2. More explicit path conversion for the geometry file
+
+The original Poisson solver is created with
+
+    geo_file=path_geo
+
+ziopera.py changes this to
+
+    geo_file=str(path_geo)
+
+This is a compatibility improvement. path_geo is a pathlib.Path object, while
+some libraries expect a plain string path. Converting it explicitly avoids
+possible issues if the QTCAD function does not fully support pathlib.Path.
+
+
+3. Energies saved through path_out
+
+The original script saves the numpy energy file with
+
+    np.save(script_dir/"output"/"DQD_SiMOS_energies.npy", energies)
+
+ziopera.py saves the same file through the centralized output path:
+
+    np.save(path_out/"DQD_SiMOS_energies.npy", energies)
+
+This does not change the physics or the data, only the path handling.
+
+
+4. Refactored Schrodinger density export
+
+The original script writes the five Schrodinger probability-density fields by
+manually indexing the eigenfunction matrix:
+
+    "Ground": np.abs(subd.eigenfunctions[:,0])**2
+    "1st excited": np.abs(subd.eigenfunctions[:,1])**2
+    ...
+
+ziopera.py introduces a list of state labels:
+
+    state_labels = ["Ground", "1st excited", "2nd excited",
+                    "3rd excited", "4th excited"]
+
+and then builds the density dictionary with a loop/dictionary comprehension:
+
+    state_densities = {
+       label: np.abs(subd.eigenfunctions[:, i])**2
+       for i, label in enumerate(state_labels)
+    }
+
+This is mostly a readability and maintainability change. The physical quantity
+is the same as before: for each eigenstate psi_i, the exported density is
+
+    |psi_i|^2
+
+at the mesh nodes of the Schrodinger subdevice.
+
+
+5. Added peak-normalized density fields
+
+The most important post-processing change in ziopera.py is the additional
+normalized field for each eigenstate:
+
+    density_max = np.max(density)
+    out_dict[f"{label} normalized"] = density/density_max
+
+with a guard for the case density_max is zero.
+
+This is a maximum-value, or peak, normalization. Each state's raw density
+|psi_i|^2 is divided by its own maximum value:
+
+    density_normalized_i(r) = |psi_i(r)|^2 / max(|psi_i|^2)
+
+Therefore each normalized density is dimensionless and has maximum value 1.
+This normalization is useful for visualization, because all five states can be
+plotted on the same color scale from 0 to 1 even if their raw maxima differ.
+
+This is not an integral normalization. It does not enforce
+
+    integral |psi_i|^2 dV = 1
+
+because the Schrodinger solver already handles the eigenfunction normalization.
+The added normalization is only a plotting/export rescaling applied after the
+Schrodinger solve. Since each state is divided by its own maximum, the
+normalized fields should be used to compare shapes/localization, not absolute
+probability-density magnitudes. The raw fields are still exported for absolute
+comparison.
+
+
+6. Improved energy text file
+
+The original energy text file writes a header and then the full energy array as
+a single string:
+
+    Energy eigenvalues [eV][...]
+
+ziopera.py writes a clearer text file:
+
+    Energy eigenvalues [eV]
+    Ground: ...
+    1st excited: ...
+    ...
+
+It also adds the maximum raw point-density for each state:
+
+    Point-density maxima [m^-3]
+    Ground: ...
+    ...
+
+These maxima are the same values used for the peak normalization above. They
+are useful if one wants to reconstruct or interpret the normalized fields.
+
+
+7. Physics unchanged in this step
+
+From the original script to ziopera.py, the following are not changed:
+
+- gate voltages;
+- doping values;
+- temperature;
+- material and region definitions;
+- dot region;
+- Poisson solver tolerance and refinement settings;
+- number of Schrodinger states;
+- Schrodinger tolerance.
+
+So ziopera.py should produce the same physical solution as the original, apart
+from possible minor numerical differences caused by path/string handling or
+library behavior. The intended change is mainly better output handling and
+better Schrodinger visualization data.
+
+
+Modifications from ziopera.py to qfile.py
+-----------------------------------------
+
+1. Separate test VTU output name
+
+ziopera.py writes the Schrodinger output to
+
+    DQD_SiMOS_q.vtu
+
+qfile.py writes instead to
+
+    DQD_SiMOS_q_refined_test.vtu
+
+The comment says this is done to keep the previous q file safe if the run is
+interrupted. In practice, qfile.py is a test/refinement version that avoids
+overwriting the main Schrodinger VTU file.
+
+
+2. Finer Poisson mesh refinement in the dot region
+
+ziopera.py uses
+
+    params_poisson.h_refined = 0.3
+
+qfile.py changes this to
+
+    params_poisson.h_refined = 0.25
+
+This asks QTCAD to use a smaller target mesh size in the refined region, which
+is the quantum-dot region. A smaller h_refined means a finer local mesh. This
+can improve the spatial resolution of the confinement potential and the
+Schrodinger eigenfunctions, at the cost of more nodes, more memory, and longer
+runtime.
+
+
+3. More robust Schrodinger solver settings
+
+qfile.py adds two Schrodinger solver parameters:
+
+    params_schrod.method = "robust"
+    params_schrod.maxiter = 3000
+
+The robust method asks the Schrodinger solver to use a more stable algorithm.
+Increasing maxiter gives the eigensolver more iterations before failing. This
+is consistent with the finer mesh: a larger or harder eigenproblem may need
+more numerical effort to converge.
+
+
+4. Full-device outputs disabled
+
+In ziopera.py, after solving Poisson and Schrodinger, the script writes several
+full-device files:
+
+- DQD_SiMOS.hdf5 with n, p, phi, EC, and EV;
+- DQD_SiMOS_n.vtu;
+- DQD_SiMOS_p.vtu;
+- DQD_SiMOS_phi.vtu;
+- DQD_SiMOS_EC.vtu;
+- DQD_SiMOS_EV.vtu.
+
+In qfile.py this whole block is commented out. The comment explains that these
+outputs are not needed to create the Schrodinger q file and can require several
+GB of disk space. Therefore qfile.py keeps the expensive full-device exports
+disabled and writes only:
+
+- DQD_SiMOS_energies.npy;
+- DQD_SiMOS_q_refined_test.vtu;
+- DQD_SiMOS_energies.txt.
+
+This makes qfile.py more practical for testing the refined Schrodinger output.
+
+
+5. Schrodinger post-processing clarified
+
+qfile.py keeps the raw density export introduced in ziopera.py, but it changes
+the ambiguous "normalized" output into three explicitly named fields for each
+state:
+
+- the raw density |psi_i|^2;
+- the peak-normalized density |psi_i|^2 / max(|psi_i|^2);
+- the point-sum-normalized density |psi_i|^2 / sum_j |psi_i(r_j)|^2;
+- the volume-integral-normalized density
+  |psi_i|^2 / sum_j |psi_i(r_j)|^2 dV_j.
+
+The peak-normalized field is useful for comparing shapes in ParaView because
+each state reaches a maximum value of 1. The point-sum-normalized field is a
+simple discrete rescaling that makes the sum over exported mesh-node values
+equal to 1.
+
+The point-sum-normalized field is still not a fully physical volume-integral
+normalization on an adaptive mesh, because it does not weight each node by the
+volume represented by that node. It is mainly useful for checking the kind of
+plain point sum that one often sees during post-processing.
+
+The volume-integral-normalized field is the closest one to the physical
+probability-density normalization. qfile.py computes nodal volume weights from
+the absolute tetrahedral volumes of the submesh, then divides the density by
+the weighted sum. The absolute value is important because tetrahedron
+orientation can make raw signed volumes negative, while physical integration
+weights must be positive. This is designed so that
+
+    sum_j density_volume_normalized(r_j) dV_j = 1
+
+where dV_j is the nodal volume weight.
+
+It also still exports the confinement potential:
+
+    subd.V / ct.e
+
+in electronvolts.
+
+
+Detailed explanation from "# Schrodinger configuration" onwards
+---------------------------------------------------------------
+
+This explanation follows the final qfile.py version, because it contains the
+latest changes.
+
+
+1. Choose the number of quantum states
+
+    num_states = 5
+
+The script asks the Schrodinger solver to compute the five lowest-energy
+eigenstates in the quantum-dot subdevice. These are later labelled as ground,
+1st excited, 2nd excited, 3rd excited, and 4th excited.
+
+
+2. Configure the Schrodinger solver
+
+    params_schrod = SchrodingerSolverParams()
+    params_schrod.num_states = num_states
+    params_schrod.tol = 1e-9
+    params_schrod.method = "robust"
+    params_schrod.maxiter = 3000
+
+params_schrod stores the numerical settings used by QTCAD's Schrodinger
+solver.
+
+num_states tells the solver how many eigenpairs to compute.
+
+tol = 1e-9 sets a strict convergence tolerance for the eigenvalue problem.
+
+method = "robust" selects a more stable solution method, useful when the mesh
+is refined or the eigenproblem is numerically difficult.
+
+maxiter = 3000 increases the maximum number of iterations. This reduces the
+chance that the solver stops before convergence on the refined mesh.
+
+
+3. Convert the Poisson electrostatic solution into a confinement potential
+
+    d.set_V_from_phi()
+
+Before this line, the Poisson solver has already computed the electrostatic
+potential phi on the full device. The Schrodinger equation needs a confinement
+potential V. The call set_V_from_phi() updates the device potential used by the
+Schrodinger solver from the electrostatic potential.
+
+For electrons, this potential is tied to the conduction-band landscape created
+by the gates, materials, dopants, and electrostatics. This is the potential in
+which the quantum states are solved.
+
+
+4. Build a submesh restricted to the quantum-dot region
+
+    submesh = SubMesh(d.mesh, dot_region)
+
+The full device mesh contains gates, oxides, reservoirs, doped regions, and the
+quantum-dot region. The Schrodinger problem is not solved on the whole device.
+Instead, it is solved only on dot_region:
+
+    ["region_pre_quantum_B_mid",
+     "region_quantum_B_mid",
+     "region_post_quantum_B_mid"]
+
+SubMesh extracts the part of the full mesh corresponding to those regions.
+This reduces the size of the quantum problem and focuses the eigenstates on the
+intended confinement region.
+
+
+5. Create a quantum subdevice
+
+    subd = SubDevice(d, submesh)
+
+SubDevice creates a QTCAD device object associated with the submesh. It
+inherits the relevant material parameters and potential information from the
+full device d, but its mesh is only the dot-region mesh. The Schrodinger solver
+will operate on this subdevice.
+
+
+6. Solve the Schrodinger equation
+
+    schrod_solver = SchrodingerSolver(subd, solver_params=params_schrod)
+    schrod_solver.solve()
+
+The Schrodinger solver computes the eigenenergies and eigenfunctions of the
+electron confined in the potential stored in subd. Conceptually, it solves
+
+    H psi_i = E_i psi_i
+
+where H includes the effective-mass kinetic term and the confinement potential.
+The results are stored in the subdevice:
+
+    subd.energies
+    subd.eigenfunctions
+
+subd.energies contains the eigenenergies in joules. The code later divides by
+ct.e to express them in electronvolts.
+
+subd.eigenfunctions is an array containing the wavefunction values on the
+submesh nodes. The column index i corresponds to the i-th eigenstate.
+
+
+7. Print and save the eigenenergies
+
+    subd.print_energies()
+    energies = subd.energies
+    np.save(path_out/"DQD_SiMOS_energies.npy", energies)
+
+print_energies() prints the energy spectrum to the terminal.
+
+The raw energy array is copied into the variable energies and saved as a numpy
+.npy file. This file keeps the numerical values in a convenient format for
+later Python analysis. Since subd.energies is stored in SI units, this numpy
+file stores energies in joules unless QTCAD internally changes that convention.
+The text output later explicitly converts to eV.
+
+
+8. Skip full-device output files in qfile.py
+
+The block that would save n, p, phi, EC, and EV over the full device is
+commented out in qfile.py.
+
+Those fields are useful for checking the Poisson solution, but they are not
+needed when the goal is only to generate the Schrodinger q file. Because the
+mesh-refined output can be extremely large, disabling those writes saves disk
+space and runtime.
+
+
+9. Define labels for the states
+
+    state_labels = ["Ground", "1st excited", "2nd excited",
+                    "3rd excited", "4th excited"]
+
+These labels are used consistently for the VTU fields and the text file.
+The label order matches the eigenfunction order: index 0 is the ground state,
+index 1 is the first excited state, and so on.
+
+
+10. Compute the raw probability-density fields
+
+    state_densities = {
+       label: np.abs(subd.eigenfunctions[:, i])**2
+       for i, label in enumerate(state_labels)
+    }
+    volume_weights = nodal_volume_weights(subd.mesh)
+
+For each eigenfunction psi_i, the script computes
+
+    |psi_i|^2
+
+This is the probability-density-like quantity associated with the quantum
+state. Because the simulation is three-dimensional, the continuous quantity has
+units of inverse volume if the eigenfunctions are normalized in the usual
+integral sense. In the output file these are nodal values on the submesh.
+
+The use of np.abs(...) is important because eigenfunctions can in general be
+complex. Squaring the absolute value gives a real, non-negative density.
+
+The script also computes nodal volume weights with
+
+    nodal_volume_weights(subd.mesh)
+
+This helper uses the tetrahedral volumes and connectivity of the Schrodinger
+submesh. The absolute value of each tetrahedron volume is used, then each
+tetrahedron volume is distributed equally to its local nodes, giving each mesh
+node an approximate positive volume weight. These weights are then used to
+approximate the volume integral of a nodal density field.
+
+
+11. Build the Schrodinger output dictionary
+
+    out_dict = {}
+    normalization_info = {}
+    for label, density in state_densities.items():
+       if len(density) != len(volume_weights):
+          raise ValueError(f"Density and volume weights have different sizes for {label}")
+
+       density_max = np.max(density)
+       density_sum = np.sum(density)
+       density_volume_integral = np.sum(density*volume_weights)
+       normalization_info[label] = {
+          "max": density_max,
+          "point_sum": density_sum,
+          "volume_integral": density_volume_integral,
+       }
+
+       out_dict[label] = density
+       out_dict[f"{label} peak-normalized"] = (
+          density/density_max if density_max != 0 else density
+       )
+       out_dict[f"{label} point-sum-normalized"] = (
+          density/density_sum if density_sum != 0 else density
+       )
+       out_dict[f"{label} volume-integral-normalized"] = (
+          density/density_volume_integral if density_volume_integral != 0 else density
+       )
+    out_dict["conf-potential"] = subd.V/ct.e
+
+out_dict is the dictionary passed to QTCAD's io.save function. Each key becomes
+a named field in the VTU file.
+
+For every state, four fields are saved:
+
+- label: the raw |psi_i|^2 density;
+- label peak-normalized: the same density divided by its own maximum value;
+- label point-sum-normalized: the same density divided by the unweighted sum
+  of the nodal density values;
+- label volume-integral-normalized: the same density divided by the
+  volume-weighted nodal integral.
+
+The peak-normalized field is dimensionless and has a maximum value of 1. This
+makes the shapes of different states easier to visualize with the same color
+map.
+
+The point-sum-normalized field is also dimensionless and has a plain nodal sum
+of 1. This is not the same as enforcing integral |psi|^2 dV = 1 unless all
+mesh nodes represent equal volume. It should therefore be treated as a
+post-processing diagnostic, not as a replacement for the solver's physical
+normalization.
+
+The volume-integral-normalized field keeps the correct density units and is
+scaled so that the approximate mesh integral is 1:
+
+    sum_j density_volume_integral_normalized(r_j) dV_j = 1
+
+The zero checks prevent division by zero if a density array is unexpectedly all
+zero.
+
+The confinement potential is also saved:
+
+    conf-potential = subd.V / ct.e
+
+subd.V is divided by the elementary charge ct.e to convert joules to
+electronvolts. This lets the potential be plotted in eV together with the
+energy eigenvalues reported in eV.
+
+
+12. Save the Schrodinger VTU file
+
+    io.save(str(path_vtu_q), out_dict, subd.mesh)
+
+This writes the quantum output on the subdevice mesh. In qfile.py the file is
+
+    DQD_SiMOS_q_refined_test.vtu
+
+The VTU file contains the five raw densities, the five peak-normalized
+densities, the five point-sum-normalized densities, the five
+volume-integral-normalized densities, and the confinement potential. It can be
+opened in visualization tools such as ParaView.
+
+
+13. Save a readable text summary
+
+    with open(path_energies, "w") as f:
+       f.write("Energy eigenvalues [eV]\n")
+       for label, energy in zip(state_labels, subd.energies/ct.e):
+          f.write(f"{label}: {energy:.12g}\n")
+       f.write("\nDensity normalization diagnostics\n")
+       f.write("peak-normalized fields are divided by max(|psi|^2)\n")
+       f.write("point-sum-normalized fields are divided by sum(|psi|^2) over mesh nodes\n")
+       f.write("volume-integral-normalized fields are divided by sum(|psi|^2*dV_node)\n")
+       for label, info in normalization_info.items():
+          f.write(
+             f"{label}: max={info['max']:.12g}, "
+             f"point_sum={info['point_sum']:.12g}, "
+             f"volume_integral={info['volume_integral']:.12g}\n"
+          )
+
+This creates DQD_SiMOS_energies.txt.
+
+The first part writes the eigenenergies in electronvolts. The conversion is
+
+    energy_eV = energy_J / ct.e
+
+The second part writes the maximum raw density and the plain nodal density sum
+for each state, plus the volume-weighted density integral. These are the
+normalization denominators used to generate the peak-normalized,
+point-sum-normalized, and volume-integral-normalized VTU fields.
+
+
+14. Print energies again
+
+    subd.print_energies()
+
+The script prints the energies a second time at the end. This is redundant but
+useful during interactive runs because the final terminal output still shows
+the computed spectrum after all files have been written.
+
+
+Summary of the final qfile.py behavior
+--------------------------------------
+
+qfile.py solves the full nonlinear Poisson problem on the SiMOS device, derives
+the electron confinement potential from that solution, extracts the dot-region
+submesh, solves the Schrodinger equation for the first five quantum states, and
+exports only the quantum data needed for visualization and analysis.
+
+The final Schrodinger VTU output contains:
+
+- raw densities |psi_i|^2 for the five states;
+- peak-normalized densities |psi_i|^2 / max(|psi_i|^2) for the five states;
+- point-sum-normalized densities |psi_i|^2 / sum_j |psi_i(r_j)|^2 for the five
+  states;
+- volume-integral-normalized densities
+  |psi_i|^2 / sum_j |psi_i(r_j)|^2 dV_j for the five states;
+- the confinement potential in eV.
+
+The final text output contains:
+
+- the five eigenenergies in eV;
+- the raw density maximum, point-density sum, and volume-weighted density
+  integral of each state, which document the normalization factors used for the
+  exported visualization fields.
