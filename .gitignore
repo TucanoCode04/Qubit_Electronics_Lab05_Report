@@ -1,4 +1,7 @@
 Output/
+output/
 Meshes/
+meshes/
+__pycache__/
 *.vtu
 output.tar.gz
