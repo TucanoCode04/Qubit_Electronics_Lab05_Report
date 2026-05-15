@@ -1,18 +1,18 @@
 \chapter{Changes in python script}
-In order to solve the Schrodinger equation for the device analyzed in this laboratory, we modified the given code whose initial aim was uniquely to calculate the potential inside the device throught the non-linear Poisson equation.
-\begin{lstlisting}[language=Python]
+In order to solve the Schrodinger equation for the device analyzed in this laboratory, we modified the given code whose initial aim was uniquely to calculate the potential inside the device throught the non-linear Poisson equation.\\
+\begin{lstlisting}[language=Python, caption={Initialization of Schrodinger parameters}, label={init}, frame=single, framesep=8pt]
     # Schrodinger configuration
     num_states = 5
     params_schrod = SchrodingerSolverParams()
     params_schrod.num_states = num_states
     params_schrod.tol = 1e-9
 \end{lstlisting}
-First, we create the object \texttt{SchrodingerSolverParams()}, a class that will contain all the parameters that we want to set.
+First (\ref{init}), we create the object \texttt{SchrodingerSolverParams()}, a class that will contain all the parameters that we want to set.
 Then, we defined the number of energy levels to consider to be equal to 5: this will tell to the program to consider only the first 5 solutions of the Schrodinger equation, storing the eigenfunctions with their correspective eigenvalues. Another paramater that is set is the threshold in the convergence process during the calculation: this value, which in this case
 is set to be equale to $1e-9$, indicates the degree of convergence we want to achieve in defining a solution valid: if the difference between two subsequential iteration for the same value is less than this threshold, then the value will be considered converged and so valid.\\
-Then, after defining the parameters for the solver, the following commands are added:
+Then, after defining the parameters for the solver, the following commands are added:\\
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=Python,caption={Physical definition of the domain}, label={domain}, frame=single, framesep=8pt]
     d.set_V_from_phi()
     submesh = SubMesh(d.mesh, dot_region)
     subd = SubDevice(d,submesh)
@@ -24,8 +24,9 @@ Then, after defining the parameters for the solver, the following commands are a
     \item \texttt{d.set\_V\_from\_phi()}: This command updates the internal state of the \texttt{Device} object \texttt{d} by populating a new attribute, the potential energy array \texttt{V}. Physically, it performs a node-by-node mapping of the electrostatic potential $\phi$ into the potential energy $V$ using the relation $V(\mathbf{r}) = -q \cdot \phi(\mathbf{r})$. Without this step, the Schrödinger solver would lack the necessary confinement potential to find bound states.
     
     \item \texttt{SubMesh} and \texttt{SubDevice}: These commands initialize the phyisical domain where the Schrodinger equation will be calcualted. By defining a \texttt{submesh} limited to the \texttt{dot\_region}, the simulation focuses computational resources only on the volume where the quantum wavefunctions are expected to be non-zero. In fact, \texttt{dot\_region} in an array defined previously in the code containing all the names of Phyisical Groups of our interest, which are:\\
-        \begin{lstlisting}
-dot_region=["region_pre_quantum_B_mid","region_quantum_B_mid","region_post_quantum_B_mid"]
+        \begin{lstlisting}[frame=single, caption={Regions containing the quantum dots}, framesep=8pt]
+dot_region=["region_pre_quantum_B_mid","region_quantum_B_mid",
+            "region_post_quantum_B_mid"]
         \end{lstlisting}
     
     The \texttt{SubDevice} object \texttt{subd} inherits all physical properties (such as temperature and materials) from the main device but operates on this significantly smaller mesh, drastically reducing memory usage and computation time.

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1778787019.43935 "/home/klakson/Desktop/uni_master/first_year/second_semester/Qubit Electronics/labs/lab5/report/Qubit_Electronics_Lab05_Report/homebook.tex" "homebook.pdf" "homebook" 1778787021.14243 0
+["pdflatex"] 1778828632.43934 "/home/klakson/Desktop/uni_master/first_year/second_semester/Qubit Electronics/labs/lab5/report/Qubit_Electronics_Lab05_Report/homebook.tex" "homebook.pdf" "homebook" 1778828634.28536 0
   "/etc/texmf/web2c/texmf.cnf" 1774005325.26675 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/home/klakson/Desktop/uni_master/first_year/second_semester/Qubit Electronics/labs/lab5/report/Qubit_Electronics_Lab05_Report/homebook.tex" 1778763849.65836 3091 b703903c26604c2895f334bf7ece1481 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -128,11 +128,11 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1774005348.12989 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1774005484 8214427 0cb22ae05101bc55f778cf89f77045eb ""
-  "homebook.aux" 1778787021.01935 476 2244f9e33b3138cd3cdd74941f6a7115 "pdflatex"
+  "homebook.aux" 1778828634.16094 977 a94b09b4c0ec4af04534b98a72300905 "pdflatex"
   "homebook.tex" 1778763849.65836 3091 b703903c26604c2895f334bf7ece1481 ""
-  "homebook.toc" 1778787021.02035 160 0b97115256cbb752163632a9d33e54c7 "pdflatex"
+  "homebook.toc" 1778828634.16194 160 0b97115256cbb752163632a9d33e54c7 "pdflatex"
   "intro/intro.tex" 1778785660.3438 62 902b5a57714b4168c1abc24a8829517d ""
-  "leo_part/leo_part.tex" 1778787019.18319 3827 5fbc6ae6fb8a23c5f9573801e3c8c9f2 ""
+  "leo_part/leo_part.tex" 1778828632.18195 4114 49b27b63734d15fd4a768b54d0a4e4ac ""
   "logopoli.png" 1778761401.79903 312859 163d44ec6d244c6e95dd034bbd631798 ""
   (generated)
   "homebook.aux"
