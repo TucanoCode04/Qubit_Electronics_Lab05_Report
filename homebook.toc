@@ -1,0 +1,6 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}Introduction}{1}{}%
+\contentsline {chapter}{\numberline {2}Changes in python script}{1}{}%
+\contentsline {chapter}{\numberline {3}Analysis of the output files}{2}{}%
+\contentsline {section}{\numberline {3.1}Analysis of the \texttt {n} file}{3}{}%
+\contentsline {section}{\numberline {3.2}Analysis of the \texttt {q} file}{4}{}%

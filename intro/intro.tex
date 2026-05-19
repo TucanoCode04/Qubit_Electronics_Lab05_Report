@@ -1,4 +1,13 @@
 \chapter{Introduction}
-In this laboratory session, we performed an analysis of the same device studied in the previous laboratory, but this time 
-adding also the characterization of the solutions of the Scrhodinger equation inside the quantum dots. This will allow us to understand
-the spatial distribution of the electrons that eventually will populate the dots.
+This report presents the analysis of a Si--SiO$_2$ double quantum dot device
+simulated with QTCAD. Starting from the electrostatic model used in the
+previous laboratory, the numerical workflow was extended by solving the
+single-particle Schr\"odinger equation in the quantum-dot region after the
+nonlinear Poisson problem had converged.
+
+The report first describes the modifications introduced in the Python script,
+including the computation of the first five quantum states with the prescribed
+solver tolerance. The generated output files are then analysed to verify the
+carrier depletion in the active region, the formation of two confinement
+minima, the localization of the eigenstates, and the coupling configuration of
+the two dots.

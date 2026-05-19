@@ -20,6 +20,7 @@ Then, after defining the parameters for the solver, the following commands are a
     schrod_solver = SchrodingerSolver(subd, solver_params=params_schrod)
     schrod_solver.solve()
 \end{lstlisting}
+\newpage
 \begin{itemize}
     \item \texttt{d.set\_V\_from\_phi()}: This command updates the internal state of the \texttt{Device} object \texttt{d} by populating a new attribute, the potential energy array \texttt{V}. Physically, it performs a node-by-node mapping of the electrostatic potential $\phi$ into the potential energy $V$ using the relation $V(\mathbf{r}) = -q \cdot \phi(\mathbf{r})$. Without this step, the Schrödinger solver would lack the necessary confinement potential to find bound states.
     

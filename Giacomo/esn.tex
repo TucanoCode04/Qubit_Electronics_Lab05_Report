@@ -1,10 +1,18 @@
-\chapter{Analysis of the density of charge}
+\chapter{Analysis of the output files}
+
+The generated outputs were inspected at both the electrostatic and quantum
+levels. The \texttt{n} file is used to verify the carrier distribution and the
+depletion of the active region, while the \texttt{q} file is used to analyse
+the confined single-particle states.
+
+\newpage
+\section{Analysis of the \texttt{n} file}
 
 To evaluate the spatial distribution of carriers before the quantum population regime, a two-dimensional slice of the electron charge density $n$ is extracted at the coordinate $Z = 45\text{ nm}$. This specific height is crucial as it accurately cuts through the active silicon channel where the double quantum dot is designed to form.
 
-\begin{figure}[htbp] 
+\begin{figure}[H] 
     \centering 
-    \includegraphics[width=0.8\textwidth]{Images/Nfile/Slice_file_n_lab5.png} 
+    \includegraphics[width=0.72\textwidth]{Images/Nfile/Slice_file_n_lab5.png} 
     \caption{Slice at Z = 45 of the file n.}
     \label{fig:mia_immagine_1} 
 \end{figure}
@@ -12,9 +20,9 @@ To evaluate the spatial distribution of carriers before the quantum population r
 As shown in the 2D density map in Fig.~\ref{fig:mia_immagine_1}, the central region of the channel is completely depleted of electrons. This behavior is directly governed by the electrostatic action of the lateral barrier gates. These gates have a direct influence on the behavior of the reservoirs and the two dots: in fact, the shape of the Drain and the Source, represented by the light blue regions at the extremities of the photo, exhibits a small protrusion towards the center, which is tightly constrained from both below and above along the Y-axis. This is the direct effect of the Y-gates, which are strictly required to achieve electrostatic confinement for the quantum dots along the Y-direction as well. Consequently, the carriers can only communicate with the central dots by tunneling through the narrow potential barriers.A distinctive feature of the density map is the presence of four highly populated regions located at the corners of the domain, highlighted in dark red due to their maximum electron density values. The inclusion of these highly doped $n$-type zones is crucial for the operation of the device at cryogenic temperatures ($10\,\text{mK}$). At such extreme temperatures, standard silicon undergoes the phenomenon of \textbf{carrier freeze-out}, losing its conductivity and turning into an insulator. This would prevent the formation of proper ohmic contacts with the external metal lines due to the creation of insurmountable Schottky junctions.To bypass this limitation, these four corner regions are heavily doped with $n$-type impurities, shifting the material into a degenerate state where it behaves like a metal, maintaining a high and stable concentration of free electrons even at millikelvin temperatures. These zones act as intermediate electron reservoirs connected to the external contacts. When the gate voltages are applied, these highly conductive corners ensure that carriers can be readily supplied to the classical Source and Drain extensions (the light blue horizontal channels) and, subsequently, tunnel into the central quantum dots.
 To quantitatively validate these 2D observations, a 1D Plot Over Line was performed across the symmetry axis at $Y = 136.5\text{ nm}$.
 
-\begin{figure}[htbp] 
+\begin{figure}[H] 
     \centering 
-    \includegraphics[width=0.8\textwidth]{Images/Nfile/Plot_file_n_lab5.png} 
+    \includegraphics[width=0.72\textwidth, height=0.48\textwidth, keepaspectratio]{Images/Nfile/Plot_file_n_lab5.png} 
     \caption{Plot overline at Y = 136.5 of the file n.}
     \label{fig:mia_immagine_2} 
 \end{figure}
