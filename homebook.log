@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.10.23)  20 MAY 2026 11:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.10.23)  20 MAY 2026 13:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -733,11 +733,11 @@ L3 programming layer <2024-09-10>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 15610 strings out of 473899
- 317563 string characters out of 5726499
+ 15616 strings out of 473899
+ 317646 string characters out of 5726499
  887058 words of memory out of 5000000
  37924 multiletter control sequences out of 15000+600000
- 724326 words of font info for 285 fonts, out of 8000000 for 9000
+ 724658 words of font info for 289 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  83i,11n,131p,2157b,1553s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/donat/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10.pf
@@ -758,7 +758,7 @@ rs/donat/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Use
 rs/donat/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy7.pfb><C:/User
 s/donat/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/User
 s/donat/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt12.pfb>
-Output written on homebook.pdf (9 pages, 1325728 bytes).
+Output written on homebook.pdf (9 pages, 1326203 bytes).
 PDF statistics:
  155 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

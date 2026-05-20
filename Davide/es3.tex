@@ -186,15 +186,22 @@ The \texttt{q} file instead contains the confinement potential and the
 probability densities of the Schr\"odinger eigenstates. These results show two
 well-defined potential minima, two nearly degenerate orbital pairs, and a
 finite inter-dot barrier. The lowest states are mostly localized on individual
-dots, indicating a weakly coupled double-dot regime. The fourth excited state,
-whose energy lies close to the barrier saddle, has a visible density in the
-inter-dot region and therefore shows the clearest bonding-like hybridized
-character among the computed levels.
+dots, but the non-zero probability density visible in the opposite dot already
+indicates that the two wells are not completely independent. Since only
+\(|\psi|^2\) is plotted, the relative phase between the two dot components is
+not visible; however, the corresponding signed wavefunctions would be expected
+to show bonding and anti-bonding combinations. This character would be more
+pronounced for perfectly degenerate dots, while the observed left-right
+staggering localizes the states more strongly on one dot. The fourth excited
+state, whose energy lies close to the barrier saddle, has the largest density
+in the inter-dot region and therefore shows the clearest hybridized character
+among the computed levels.
 
 Overall, the simulated structure behaves as expected for a gate-defined double
 quantum dot: the electrostatic solution creates the required depletion and
 confinement, and the quantum solution resolves localized dot states together
-with the onset of tunnel-mediated hybridization. Since the output stores
-\(|\psi|^2\), the bonding assignment is based on the spatial density in the
-barrier region; a strict bonding/antibonding phase distinction would require
-the signed wavefunction.
+with the onset of tunnel-mediated hybridization. The probability-density maps
+therefore support a weakly coupled double-dot configuration, with
+bonding/anti-bonding behavior likely present in the signed wavefunctions but
+partially masked in the plotted \(|\psi|^2\) fields by the residual
+left-right staggering.
