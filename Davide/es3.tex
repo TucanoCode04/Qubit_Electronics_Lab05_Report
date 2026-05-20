@@ -197,11 +197,59 @@ state, whose energy lies close to the barrier saddle, has the largest density
 in the inter-dot region and therefore shows the clearest hybridized character
 among the computed levels.
 
+To check this interpretation, an additional post-processing run was performed
+by exporting the signed wavefunctions instead of the probability densities.
+The simulation itself was not changed: in a copied version of the q-file
+script, the output fields were changed from
+\(\left|\texttt{subd.eigenfunctions[:, i]}\right|^2\) to
+\(\texttt{np.real(subd.eigenfunctions[:, i])}\), and only the five
+\(\psi_i\) fields were saved in a separate VTU file. These plots are used to
+analyse nodes and relative phase, while the \(|\psi|^2\) plots remain the
+direct visualization of carrier localization.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"Images/Qfile/Plots Psi/GroundFirst.png"}
+        \caption{Lowest pair.}
+        \label{fig:q-psi-ground-first}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"Images/Qfile/Plots Psi/SecondThird.png"}
+        \caption{First excited pair.}
+        \label{fig:q-psi-second-third}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"Images/Qfile/Plots Psi/Forth.png"}
+        \caption{Fourth excited level.}
+        \label{fig:q-psi-fourth}
+    \end{subfigure}
+    \caption{Signed wavefunction profiles along the axis connecting the two
+    dots.}
+    \label{fig:q-psi-line-plots}
+\end{figure}
+
+The signed profiles in Fig.~\ref{fig:q-psi-line-plots} support the same
+physical picture. The two lowest states remain mainly localized in opposite
+dots, but weak tails and small sign changes are visible in the other well,
+showing that the two dots are not fully isolated. The second and third states
+show the nodal structure expected for the first excited orbital of the two
+dots. The fourth excited state is the most hybridized one: its wavefunction has
+sizeable amplitude in both wells and a sign-changing central component, making
+the bonding/anti-bonding character more evident than in the probability-density
+representation.
+
 Overall, the simulated structure behaves as expected for a gate-defined double
 quantum dot: the electrostatic solution creates the required depletion and
 confinement, and the quantum solution resolves localized dot states together
 with the onset of tunnel-mediated hybridization. The probability-density maps
-therefore support a weakly coupled double-dot configuration, with
-bonding/anti-bonding behavior likely present in the signed wavefunctions but
-partially masked in the plotted \(|\psi|^2\) fields by the residual
-left-right staggering.
+therefore support a weakly coupled double-dot configuration. The signed
+wavefunction check confirms that phase information, hidden in the
+\(|\psi|^2\) fields, is consistent with bonding/anti-bonding behavior; this
+behavior is only partially developed because the residual left-right staggering
+still localizes the lower states on individual dots.
