@@ -5,3 +5,4 @@ meshes/
 __pycache__/
 *.vtu
 output.tar.gz
+Old_outputs/

@@ -4,3 +4,4 @@
 \contentsline {chapter}{\numberline {3}Analysis of the output files}{2}{}%
 \contentsline {section}{\numberline {3.1}Analysis of the \texttt {n} file}{3}{}%
 \contentsline {section}{\numberline {3.2}Analysis of the \texttt {q} file}{4}{}%
+\contentsline {section}{\numberline {3.3}Concluding remarks on the output analysis}{7}{}%
